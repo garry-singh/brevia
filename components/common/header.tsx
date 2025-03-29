@@ -2,6 +2,7 @@ import { FileText } from "lucide-react";
 import NavLink from "./nav-link";
 import { SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { SignedIn } from "@clerk/nextjs";
+
 export default function Header() {
   return (
     <nav className="container flex items-center w-full justify-between py-4 mx-auto px-2 lg:px-4">
