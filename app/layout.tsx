@@ -5,6 +5,7 @@ import Header from "@/components/common/header";
 import Footer from "@/components/common/footer";
 import { ClerkProvider } from "@clerk/nextjs";
 import BgGradient from "@/components/common/bg-gradient";
+import { Toaster } from "sonner";
 
 const fontSans = FontSans({
   variable: "--font-sans",
@@ -27,6 +28,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={`${fontSans.variable} font-sans antialiased`}>
+          <Toaster />
           <div className="relative flex flex-col min-h-screen">
             <BgGradient />
             <Header />
