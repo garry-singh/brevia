@@ -4,8 +4,17 @@ import { z } from 'zod';
 import UploadFormInput from './upload-form-input';
 import { useUploadThing } from '@/utils/uploadthing';
 import { toast } from 'sonner';
-import { generatePdfSummary } from '@/actions/upload-actions';
+import { generatePdfSummary, storePDFSummary } from '@/actions/upload-actions';
 import { useRef, useState } from 'react';
+
+type SummaryResponse = {
+  success: boolean;
+  message: string;
+  data: {
+    summary: string;
+    title: string;
+  } | null;
+};
 
 const schema = z.object({
   file: z
@@ -83,23 +92,35 @@ export default function UploadForm() {
       });
 
       // Parse the pdf using langchain
-      const summary = await generatePdfSummary(response);
+      const summary = (await generatePdfSummary(response)) as SummaryResponse;
 
-      const { data = null, message = null } = summary || {};
-
-      if (data) {
+      if (summary?.data?.summary) {
         toast.success('Saving PDF summary...', {
           description: 'Hang tight! We are saving your summary.',
         });
 
         formRef.current?.reset();
 
-        // if (data.summary) {
-        //   // Save the summary to the database
-        // }
-      }
+        // Save the summary to the database
+        await storePDFSummary(
+          summary.data.summary,
+          response[0].serverData.fileUrl,
+          'completed',
+          summary.data.title || 'Untitled',
+          file.name || 'Untitled.pdf'
+        );
 
-      // Summarize the pdf using ai
+        toast.success('Summary generated successfully', {
+          description:
+            'Your PDF summary has been successfully summarized and saved.',
+        });
+
+        formRef.current?.reset();
+      } else {
+        toast.error('Failed to generate summary', {
+          description: summary?.message || 'Please try again',
+        });
+      }
 
       // Redirect to the [id] summary page
     } catch (error) {
